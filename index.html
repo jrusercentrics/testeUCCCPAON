@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Usercentrics Preview Test (GitHub Pages)</title>
+
+  <!-- NOTE: This page is for testing only (staging/local). -->
+  <!-- Usercentrics preview loader (forces draft/preview) -->
+  <script
+    id="usercentrics-cmp"
+    src="https://app.usercentrics.eu/browser-ui/preview/bundle.js"
+    data-settings-id="ZDrQRQVW5VLq7z"
+    data-version="preview"
+    async
+    crossorigin="anonymous">
+  </script>
+
+  <!-- Privacy Proxy / block bundle (optional) -->
+  <script
+    src="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
+    crossorigin="anonymous"
+    async>
+  </script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 28px; line-height:1.45; }
+    .info { background:#f6f9ff; border-left:4px solid #3b82f6; padding:12px; margin-bottom:16px; }
+    button { padding:8px 12px; border-radius:6px; border:1px solid #ddd; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <h1>Usercentrics Preview Test</h1>
+
+  <div class="info">
+    <p><strong>Objetivo:</strong> testar a versão <em>draft/preview</em> da configuração Usercentrics para o <code>data-settings-id</code> usado abaixo.</p>
+    <p>Abre a consola (F12) para ver logs de inicialização. Não uses isto em produção.</p>
+  </div>
+
+  <p>
+    <button id="openConsent">Reopen consent layer (if available)</button>
+    &nbsp;
+    <button id="showStatus">Check UC_UI status</button>
+  </p>
+
+  <hr />
+
+  <h2>Blocking demo targets (placeholders)</h2>
+  <p>Os ids abaixo são apenas placeholders para testar o bloqueio via <code>uc.blockOnly</code> / <code>uc.blockElements</code>:</p>
+
+  <div id="UC_SDP_Videos" style="width:420px;height:240px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;margin:8px 0;">
+    <small>Video placeholder (#UC_SDP_Videos)</small>
+  </div>
+
+  <div id="UC_SDP_GoogleMap" style="width:420px;height:240px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;margin:8px 0;">
+    <small>Map placeholder (#UC_SDP_GoogleMap)</small>
+  </div>
+
+  <div id="psJobWidget" style="width:100%;height:120px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;margin:8px 0;">
+    <small>OnlyFy placeholder (#psJobWidget)</small>
+  </div>
+
+  <script>
+    // Fallback logs / helpers
+    console.log("🔍 Usercentrics preview test page loaded.");
+
+    // Attempt to call uc.blockOnly / blockElements when uc-block bundle is ready.
+    // The uc-block.bundle.js might initialize "uc" global — use a small retry loop.
+    (function initBlockBundle() {
+      var attempts = 0;
+      function tryInit() {
+        attempts++;
+        if (typeof uc !== "undefined" && uc && typeof uc.blockOnly === "function") {
+          try {
+            uc.blockOnly([
+              'BJz7qNsdj-7', // YouTube (example)
+              'S1pcEj_jZX', // Google Maps (example)
+              'ctDbl6j2y'   // OnlyFy (example)
+            ]);
+            uc.blockElements({
+              'BJz7qNsdj-7': '#UC_SDP_Videos',
+              'S1pcEj_jZX': '#UC_SDP_GoogleMap',
+              'ctDbl6j2y': '#psJobWidget'
+            });
+            console.log("✅ uc-block bundle initialized and block rules applied.");
+          } catch (e) {
+            console.warn("uc-block init error:", e);
+          }
+        } else if (attempts < 20) {
+          // retry a few times (async loader)
+          setTimeout(tryInit, 200);
+        } else {
+          console.warn("⚠️ uc-block bundle not available after retries. If you see CSP errors, check headers / use staging.");
+        }
+      }
+      tryInit();
+    })();
+
+
+    // Listen for the Usercentrics initialization event
+    window.addEventListener("usercentrics_initialized", function() {
+      console.log("✅ usercentrics_initialized event fired. UC_UI:", typeof UC_UI);
+    });
+
+    // Reopen consent layer (button)
+    document.getElementById("openConsent").addEventListener("click", function() {
+      if (typeof UC_UI !== "undefined" && UC_UI && typeof UC_UI.showSecondLayer === "function") {
+        UC_UI.showSecondLayer();
+        console.log("Called UC_UI.showSecondLayer()");
+      } else {
+        console.error("UC_UI not available or showSecondLayer not a function.");
+      }
+    });
+
+    // Status button
+    document.getElementById("showStatus").addEventListener("click", function() {
+      console.log("UC_UI:", typeof UC_UI, "uc:", typeof uc);
+      if (typeof UC_UI !== "undefined") {
+        try { console.log("UC_UI object:", UC_UI); } catch(e){}
+      }
+    });
+
+    // Small protection: if preview loader blocked by CSP, show a hint.
+    setTimeout(function() {
+      if (typeof UC_UI === "undefined" && typeof window.__uc_init__ === "undefined") {
+        console.warn("It looks like the Usercentrics loader did not initialize. Check the console for CSP errors or network blocks.");
+      }
+    }, 1500);
+  </script>
+</body>
+</html>
