@@ -1,113 +1,99 @@
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usercentrics CMP – No Nonce Replication</title>
+  <meta charset="utf-8">
+  <title>CCPA Navigation Bug Reproduction (BZrm1eYa-)</title>
 
-  <!-- Usercentrics CMP (production build, no nonce) -->
   <script
     id="usercentrics-cmp"
-    src="https://app.usercentrics.eu/browser-ui/3.54.0/bundle.js"
+    src="https://app.usercentrics.eu/browser-ui/latest/loader.js"
     data-settings-id="BZrm1eYa-"
     async
     crossorigin="anonymous">
   </script>
 
-  <!-- Privacy Proxy / uc-block -->
-  <script
-    src="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
-    crossorigin="anonymous"
-    async>
-  </script>
-
   <style>
-    body {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto;
-      padding: 2rem;
-      line-height: 1.5;
-    }
-    h1 { color: #144a86; }
-    #UC_SDP_Videos, #UC_SDP_GoogleMap, #psJobWidget {
-      width: 420px; height: 240px;
-      border: 1px dashed #ccc;
-      display: flex; align-items: center; justify-content: center;
-      margin: 1rem 0;
-    }
+    body { font-family: system-ui, -apple-system, "Segoe UI"; padding: 2rem; }
+    nav a { margin-right: 1rem; cursor: pointer; color: #0366d6; text-decoration: underline; }
+    section { margin-top: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; }
+    #log { background: #f6f9ff; padding: 1rem; margin-top: 1rem; border-radius: 8px; white-space: pre-wrap; font-size: 0.9rem; }
+    button { margin-right: 1rem; padding: 0.5rem 1rem; }
   </style>
 </head>
-
 <body>
-  <h1>Usercentrics CMP – No Nonce Test</h1>
+  <h1>CCPA test (single-page simulation)</h1>
 
-  <p>
-    Este teste replica a implementação real do cliente, <strong>sem nonce</strong>.
-    Abre a consola (F12) para ver os logs de inicialização.
-  </p>
+  <nav>
+    <a data-page="home">🏠 Home</a>
+    <a data-page="products">📦 Products</a>
+    <a data-page="contact">📞 Contact</a>
+  </nav>
 
-  <button id="openConsent">Abrir segunda camada</button>
-  <button id="showStatus">Mostrar estado</button>
+  <section id="content">Initial content loaded.</section>
 
-  <div id="UC_SDP_Videos"><small>Video placeholder (#UC_SDP_Videos)</small></div>
-  <div id="UC_SDP_GoogleMap"><small>Map placeholder (#UC_SDP_GoogleMap)</small></div>
-  <div id="psJobWidget"><small>OnlyFy placeholder (#psJobWidget)</small></div>
+  <div style="margin-top:1rem;">
+    <button id="reopen">Reopen consent layer</button>
+    <button id="reloadUC">Reload Usercentrics (manual workaround)</button>
+  </div>
+
+  <div id="log"></div>
 
   <script>
-    console.log("🚀 Usercentrics no-nonce test page loaded");
+    const log = msg => {
+      console.log(msg);
+      document.getElementById("log").textContent += msg + "\\n";
+    };
 
-    // Retry initialization of uc-block
-    (function initBlockBundle() {
-      let attempts = 0;
-      function tryInit() {
-        attempts++;
-        if (typeof uc !== "undefined" && uc && typeof uc.blockOnly === "function") {
-          try {
-            uc.blockOnly(['BJz7qNsdj-7','S1pcEj_jZX','ctDbl6j2y']);
-            uc.blockElements({
-              'BJz7qNsdj-7': '#UC_SDP_Videos',
-              'S1pcEj_jZX': '#UC_SDP_GoogleMap',
-              'ctDbl6j2y': '#psJobWidget'
-            });
-            console.log("✅ uc-block initialized");
-          } catch (e) {
-            console.error("❌ uc-block error:", e);
-          }
-        } else if (attempts < 20) {
-          setTimeout(tryInit, 200);
-        } else {
-          console.warn("⚠️ uc-block not available after retries.");
-        }
-      }
-      tryInit();
-    })();
+    log("🚀 Page loaded, initializing CMP with ID: BZrm1eYa-");
 
-    // Wait for UC_UI
-    window.addEventListener("usercentrics_initialized", function() {
-      console.log("✅ usercentrics_initialized event fired");
-      console.log("UC_UI:", UC_UI);
+    window.addEventListener("usercentrics_initialized", () => {
+      log("✅ Usercentrics initialized");
     });
 
-    // Buttons
-    document.getElementById("openConsent").addEventListener("click", function() {
+    // simulate SPA navigation
+    const pages = {
+      home: "<h2>Home</h2><p>Welcome to our site!</p>",
+      products: "<h2>Products</h2><p>Here's our product list.</p>",
+      contact: "<h2>Contact</h2><p>Contact us at info@example.com</p>"
+    };
+
+    document.querySelectorAll("nav a").forEach(a => {
+      a.addEventListener("click", e => {
+        const page = e.target.dataset.page;
+        document.getElementById("content").innerHTML = pages[page] || "Unknown page";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        log(`🧭 Navigated to '${page}'`);
+        // simulate losing UC_UI like in client's case
+        if (window.location.hash !== "#simulateBreak") {
+          log("⚠️ Simulating UC_UI lost after navigation...");
+          delete window.UC_UI;
+        }
+      });
+    });
+
+    // reopen consent layer
+    document.getElementById("reopen").addEventListener("click", () => {
       if (typeof UC_UI !== "undefined" && UC_UI.showSecondLayer) {
         UC_UI.showSecondLayer();
-        console.log("🪟 UC_UI.showSecondLayer() called");
+        log("🪟 UC_UI.showSecondLayer() executed");
       } else {
-        console.warn("UC_UI not ready");
+        log("❌ UC_UI is not defined or not ready");
       }
     });
 
-    document.getElementById("showStatus").addEventListener("click", function() {
-      console.log("UC_UI:", typeof UC_UI, "uc:", typeof uc);
-      if (typeof UC_UI !== "undefined") console.dir(UC_UI);
+    // manual reload workaround
+    document.getElementById("reloadUC").addEventListener("click", () => {
+      log("♻️ Reloading Usercentrics...");
+      const old = document.getElementById("usercentrics-cmp");
+      if (old) old.remove();
+      const s = document.createElement("script");
+      s.id = "usercentrics-cmp";
+      s.src = "https://app.usercentrics.eu/browser-ui/latest/loader.js";
+      s.dataset.settingsId = "BZrm1eYa-";
+      s.async = true;
+      s.crossOrigin = "anonymous";
+      document.head.appendChild(s);
     });
-
-    // Timeout check
-    setTimeout(() => {
-      if (typeof UC_UI === "undefined") {
-        console.warn("⚠️ Usercentrics loader not initialized. Check CSP or script errors.");
-      }
-    }, 2000);
   </script>
 </body>
 </html>
