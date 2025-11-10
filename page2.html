@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CCPA Test – Page 2 (BZrm1eYa-)</title>
+
+  <!-- Usercentrics CMP -->
+  <script
+    id="usercentrics-cmp"
+    src="https://app.usercentrics.eu/browser-ui/latest/loader.js"
+    data-settings-id="BZrm1eYa-"
+    async
+    crossorigin="anonymous">
+  </script>
+
+  <!-- UC block (optional) -->
+  <script
+    src="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
+    async
+    crossorigin="anonymous">
+  </script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI"; padding: 2rem; }
+    a { color: #0366d6; text-decoration: underline; cursor: pointer; }
+    button { margin: 1rem 0; padding: 0.5rem 1rem; }
+    #log { background: #f6f9ff; padding: 1rem; border-radius: 6px; font-size: 0.9rem; white-space: pre-wrap; }
+  </style>
+</head>
+
+<body>
+  <h1>CCPA Test – Page 2</h1>
+  <p>You are now on Page 2 (same settings ID).</p>
+
+  <p><a href="index.html">← Back to Page 1</a></p>
+
+  <button id="reopen">Reopen consent layer</button>
+  <div id="log"></div>
+
+  <script>
+    const log = msg => {
+      console.log(msg);
+      document.getElementById("log").textContent += msg + "\n";
+    };
+
+    log("🚀 Page 2 loaded");
+
+    window.addEventListener("usercentrics_initialized", () => {
+      log("✅ Usercentrics initialized (Page 2)");
+    });
+
+    document.getElementById("reopen").addEventListener("click", () => {
+      if (typeof UC_UI !== "undefined" && UC_UI.showSecondLayer) {
+        UC_UI.showSecondLayer();
+        log("🪟 UC_UI.showSecondLayer() called (Page 2)");
+      } else {
+        log("❌ UC_UI not defined (Page 2)");
+      }
+    });
+  </script>
+</body>
+</html>
