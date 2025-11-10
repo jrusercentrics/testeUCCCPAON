@@ -1,22 +1,20 @@
-<!doctype html>
-<html lang="pt-PT">
+<!DOCTYPE html>
+<html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Usercentrics Preview Test (GitHub Pages)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usercentrics CMP – No Nonce Replication</title>
 
-  <!-- NOTE: This page is for testing only (staging/local). -->
-  <!-- Usercentrics preview loader (forces draft/preview) -->
+  <!-- Usercentrics CMP (production build, no nonce) -->
   <script
     id="usercentrics-cmp"
-    src="https://app.usercentrics.eu/browser-ui/preview/bundle.js"
-    data-settings-id="9S0YpI7VSssd1D"
-    data-version="preview"
+    src="https://app.usercentrics.eu/browser-ui/3.54.0/bundle.js"
+    data-settings-id="BZrm1eYa-"
     async
     crossorigin="anonymous">
   </script>
 
-  <!-- Privacy Proxy / block bundle (optional) -->
+  <!-- Privacy Proxy / uc-block -->
   <script
     src="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
     crossorigin="anonymous"
@@ -24,108 +22,92 @@
   </script>
 
   <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 28px; line-height:1.45; }
-    .info { background:#f6f9ff; border-left:4px solid #3b82f6; padding:12px; margin-bottom:16px; }
-    button { padding:8px 12px; border-radius:6px; border:1px solid #ddd; cursor:pointer; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    h1 { color: #144a86; }
+    #UC_SDP_Videos, #UC_SDP_GoogleMap, #psJobWidget {
+      width: 420px; height: 240px;
+      border: 1px dashed #ccc;
+      display: flex; align-items: center; justify-content: center;
+      margin: 1rem 0;
+    }
   </style>
 </head>
-<body>
-  <h1>Usercentrics Preview Test</h1>
 
-  <div class="info">
-    <p><strong>Objetivo:</strong> testar a versão <em>draft/preview</em> da configuração Usercentrics para o <code>data-settings-id</code> usado abaixo.</p>
-    <p>Abre a consola (F12) para ver logs de inicialização. Não uses isto em produção.</p>
-  </div>
+<body>
+  <h1>Usercentrics CMP – No Nonce Test</h1>
 
   <p>
-    <button id="openConsent">Reopen consent layer (if available)</button>
-    &nbsp;
-    <button id="showStatus">Check UC_UI status</button>
+    Este teste replica a implementação real do cliente, <strong>sem nonce</strong>.
+    Abre a consola (F12) para ver os logs de inicialização.
   </p>
 
-  <hr />
+  <button id="openConsent">Abrir segunda camada</button>
+  <button id="showStatus">Mostrar estado</button>
 
-  <h2>Blocking demo targets (placeholders)</h2>
-  <p>Os ids abaixo são apenas placeholders para testar o bloqueio via <code>uc.blockOnly</code> / <code>uc.blockElements</code>:</p>
-
-  <div id="UC_SDP_Videos" style="width:420px;height:240px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;margin:8px 0;">
-    <small>Video placeholder (#UC_SDP_Videos)</small>
-  </div>
-
-  <div id="UC_SDP_GoogleMap" style="width:420px;height:240px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;margin:8px 0;">
-    <small>Map placeholder (#UC_SDP_GoogleMap)</small>
-  </div>
-
-  <div id="psJobWidget" style="width:100%;height:120px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;margin:8px 0;">
-    <small>OnlyFy placeholder (#psJobWidget)</small>
-  </div>
+  <div id="UC_SDP_Videos"><small>Video placeholder (#UC_SDP_Videos)</small></div>
+  <div id="UC_SDP_GoogleMap"><small>Map placeholder (#UC_SDP_GoogleMap)</small></div>
+  <div id="psJobWidget"><small>OnlyFy placeholder (#psJobWidget)</small></div>
 
   <script>
-    // Fallback logs / helpers
-    console.log("🔍 Usercentrics preview test page loaded.");
+    console.log("🚀 Usercentrics no-nonce test page loaded");
 
-    // Attempt to call uc.blockOnly / blockElements when uc-block bundle is ready.
-    // The uc-block.bundle.js might initialize "uc" global — use a small retry loop.
+    // Retry initialization of uc-block
     (function initBlockBundle() {
-      var attempts = 0;
+      let attempts = 0;
       function tryInit() {
         attempts++;
         if (typeof uc !== "undefined" && uc && typeof uc.blockOnly === "function") {
           try {
-            uc.blockOnly([
-              'BJz7qNsdj-7', // YouTube (example)
-              'S1pcEj_jZX', // Google Maps (example)
-              'ctDbl6j2y'   // OnlyFy (example)
-            ]);
+            uc.blockOnly(['BJz7qNsdj-7','S1pcEj_jZX','ctDbl6j2y']);
             uc.blockElements({
               'BJz7qNsdj-7': '#UC_SDP_Videos',
               'S1pcEj_jZX': '#UC_SDP_GoogleMap',
               'ctDbl6j2y': '#psJobWidget'
             });
-            console.log("✅ uc-block bundle initialized and block rules applied.");
+            console.log("✅ uc-block initialized");
           } catch (e) {
-            console.warn("uc-block init error:", e);
+            console.error("❌ uc-block error:", e);
           }
         } else if (attempts < 20) {
-          // retry a few times (async loader)
           setTimeout(tryInit, 200);
         } else {
-          console.warn("⚠️ uc-block bundle not available after retries. If you see CSP errors, check headers / use staging.");
+          console.warn("⚠️ uc-block not available after retries.");
         }
       }
       tryInit();
     })();
 
-
-    // Listen for the Usercentrics initialization event
+    // Wait for UC_UI
     window.addEventListener("usercentrics_initialized", function() {
-      console.log("✅ usercentrics_initialized event fired. UC_UI:", typeof UC_UI);
+      console.log("✅ usercentrics_initialized event fired");
+      console.log("UC_UI:", UC_UI);
     });
 
-    // Reopen consent layer (button)
+    // Buttons
     document.getElementById("openConsent").addEventListener("click", function() {
-      if (typeof UC_UI !== "undefined" && UC_UI && typeof UC_UI.showSecondLayer === "function") {
+      if (typeof UC_UI !== "undefined" && UC_UI.showSecondLayer) {
         UC_UI.showSecondLayer();
-        console.log("Called UC_UI.showSecondLayer()");
+        console.log("🪟 UC_UI.showSecondLayer() called");
       } else {
-        console.error("UC_UI not available or showSecondLayer not a function.");
+        console.warn("UC_UI not ready");
       }
     });
 
-    // Status button
     document.getElementById("showStatus").addEventListener("click", function() {
       console.log("UC_UI:", typeof UC_UI, "uc:", typeof uc);
-      if (typeof UC_UI !== "undefined") {
-        try { console.log("UC_UI object:", UC_UI); } catch(e){}
-      }
+      if (typeof UC_UI !== "undefined") console.dir(UC_UI);
     });
 
-    // Small protection: if preview loader blocked by CSP, show a hint.
-    setTimeout(function() {
-      if (typeof UC_UI === "undefined" && typeof window.__uc_init__ === "undefined") {
-        console.warn("It looks like the Usercentrics loader did not initialize. Check the console for CSP errors or network blocks.");
+    // Timeout check
+    setTimeout(() => {
+      if (typeof UC_UI === "undefined") {
+        console.warn("⚠️ Usercentrics loader not initialized. Check CSP or script errors.");
       }
-    }, 1500);
+    }, 2000);
   </script>
 </body>
 </html>
