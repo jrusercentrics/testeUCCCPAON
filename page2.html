@@ -1,60 +1,67 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>CCPA Test – Page 2 (BZrm1eYa-)</title>
+  <meta charset="utf-8" />
+  <title>Usercentrics CCPA Test – Page 2</title>
 
-  <!-- Usercentrics CMP -->
-  <script
-    id="usercentrics-cmp"
-    src="https://app.usercentrics.eu/browser-ui/latest/loader.js"
-    data-settings-id="BZrm1eYa-"
-    async
-    crossorigin="anonymous">
-  </script>
+  <link rel="preconnect" href="https://privacy-proxy.usercentrics.eu">
+  <link rel="preload"
+        href="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
+        as="script"
+        crossorigin="anonymous">
 
-  <!-- UC block (optional) -->
-  <script
-    src="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
-    async
-    crossorigin="anonymous">
+  <script nonce="abc123nonce"
+          id="usercentrics-cmp"
+          src="https://app.usercentrics.eu/browser-ui/3.54.0/bundle.js"
+          data-settings-id="BZrm1eYa-"
+          async
+          crossorigin="anonymous"></script>
+
+  <script nonce="abc123nonce"
+          src="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
+          crossorigin="anonymous"></script>
+
+  <script nonce="abc123nonce">
+    uc.blockOnly([
+      'BJz7qNsdj-7', // YouTube
+      'S1pcEj_jZX', // Google Maps
+      'ctDbl6j2y'   // OnlyFy
+    ]);
+
+    uc.blockElements({
+      'BJz7qNsdj-7': '#UC_SDP_Videos',
+      'S1pcEj_jZX': '#UC_SDP_GoogleMap',
+      'ctDbl6j2y': '#psJobWidget'
+    });
   </script>
 
   <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI"; padding: 2rem; }
-    a { color: #0366d6; text-decoration: underline; cursor: pointer; }
-    button { margin: 1rem 0; padding: 0.5rem 1rem; }
-    #log { background: #f6f9ff; padding: 1rem; border-radius: 6px; font-size: 0.9rem; white-space: pre-wrap; }
+    body { font-family: system-ui, sans-serif; padding: 2rem; }
+    button, a { padding: 0.5rem 1rem; cursor: pointer; margin-top: 1rem; display: inline-block; }
+    #UC_SDP_Videos, #UC_SDP_GoogleMap, #psJobWidget {
+      margin-top: 1.5rem; padding: 1rem; border: 1px dashed #ccc;
+    }
   </style>
 </head>
 
 <body>
-  <h1>CCPA Test – Page 2</h1>
-  <p>You are now on Page 2 (same settings ID).</p>
+  <h1>Usercentrics CCPA Test – Page 2</h1>
+  <p>This page replicates the same CMP setup to test UC_UI persistence.</p>
 
-  <p><a href="index.html">← Back to Page 1</a></p>
+  <a href="index.html">⬅️ Back to Page 1</a><br>
+  <button id="reopen">Reopen Consent Layer (UC_UI.showSecondLayer)</button>
 
-  <button id="reopen">Reopen consent layer</button>
-  <div id="log"></div>
+  <div id="UC_SDP_Videos">YouTube Block Div</div>
+  <div id="UC_SDP_GoogleMap">Google Map Block Div</div>
+  <div id="psJobWidget">OnlyFy Block Div</div>
 
-  <script>
-    const log = msg => {
-      console.log(msg);
-      document.getElementById("log").textContent += msg + "\n";
-    };
-
-    log("🚀 Page 2 loaded");
-
-    window.addEventListener("usercentrics_initialized", () => {
-      log("✅ Usercentrics initialized (Page 2)");
-    });
-
+  <script nonce="abc123nonce">
     document.getElementById("reopen").addEventListener("click", () => {
       if (typeof UC_UI !== "undefined" && UC_UI.showSecondLayer) {
         UC_UI.showSecondLayer();
-        log("🪟 UC_UI.showSecondLayer() called (Page 2)");
+        console.log("✅ UC_UI.showSecondLayer() executed (page2).");
       } else {
-        log("❌ UC_UI not defined (Page 2)");
+        console.error("❌ UC_UI not defined or showSecondLayer() missing (page2).");
       }
     });
   </script>
