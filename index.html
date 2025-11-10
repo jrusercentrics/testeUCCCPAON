@@ -1,98 +1,72 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>CCPA Navigation Bug Reproduction (BZrm1eYa-)</title>
+  <meta charset="utf-8" />
+  <title>Usercentrics CCPA Test (BZrm1eYa-)</title>
 
-  <script
-    id="usercentrics-cmp"
-    src="https://app.usercentrics.eu/browser-ui/latest/loader.js"
-    data-settings-id="BZrm1eYa-"
-    async
-    crossorigin="anonymous">
+  <!-- Preconnect e Preload -->
+  <link rel="preconnect" href="https://privacy-proxy.usercentrics.eu">
+  <link rel="preload"
+        href="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
+        as="script"
+        crossorigin="anonymous">
+
+  <!-- Usercentrics CMP (bundle principal) -->
+  <script nonce="abc123nonce"
+          id="usercentrics-cmp"
+          src="https://app.usercentrics.eu/browser-ui/3.54.0/bundle.js"
+          data-settings-id="BZrm1eYa-"
+          async
+          crossorigin="anonymous"></script>
+
+  <!-- UC Block -->
+  <script nonce="abc123nonce"
+          src="https://privacy-proxy.usercentrics.eu/3.3.10/uc-block.bundle.js"
+          crossorigin="anonymous"></script>
+
+  <!-- Blocos de configuração UC -->
+  <script nonce="abc123nonce">
+    uc.blockOnly([
+      'BJz7qNsdj-7', // YouTube
+      'S1pcEj_jZX', // Google Maps
+      'ctDbl6j2y'   // OnlyFy
+    ]);
+
+    uc.blockElements({
+      'BJz7qNsdj-7': '#UC_SDP_Videos',     // Block Div
+      'S1pcEj_jZX': '#UC_SDP_GoogleMap',   // Block Div
+      'ctDbl6j2y': '#psJobWidget'          // Block Div
+    });
   </script>
 
   <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI"; padding: 2rem; }
-    nav a { margin-right: 1rem; cursor: pointer; color: #0366d6; text-decoration: underline; }
-    section { margin-top: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; }
-    #log { background: #f6f9ff; padding: 1rem; margin-top: 1rem; border-radius: 8px; white-space: pre-wrap; font-size: 0.9rem; }
-    button { margin-right: 1rem; padding: 0.5rem 1rem; }
+    body { font-family: system-ui, sans-serif; padding: 2rem; }
+    button, a { padding: 0.5rem 1rem; cursor: pointer; margin-top: 1rem; display: inline-block; }
+    #UC_SDP_Videos, #UC_SDP_GoogleMap, #psJobWidget {
+      margin-top: 1.5rem; padding: 1rem; border: 1px dashed #ccc;
+    }
   </style>
 </head>
+
 <body>
-  <h1>CCPA test (single-page simulation)</h1>
+  <h1>Usercentrics CCPA Test Page</h1>
+  <p>Test implementation identical to the client’s setup, with <code>data-settings-id="BZrm1eYa-"</code></p>
 
-  <nav>
-    <a data-page="home">🏠 Home</a>
-    <a data-page="products">📦 Products</a>
-    <a data-page="contact">📞 Contact</a>
-  </nav>
+  <a href="page2.html">➡️ Go to Page 2</a><br>
+  <button id="reopen">Reopen Consent Layer (UC_UI.showSecondLayer)</button>
 
-  <section id="content">Initial content loaded.</section>
+  <div id="UC_SDP_Videos">YouTube Block Div</div>
+  <div id="UC_SDP_GoogleMap">Google Map Block Div</div>
+  <div id="psJobWidget">OnlyFy Block Div</div>
 
-  <div style="margin-top:1rem;">
-    <button id="reopen">Reopen consent layer</button>
-    <button id="reloadUC">Reload Usercentrics (manual workaround)</button>
-  </div>
-
-  <div id="log"></div>
-
-  <script>
-    const log = msg => {
-      console.log(msg);
-      document.getElementById("log").textContent += msg + "\\n";
-    };
-
-    log("🚀 Page loaded, initializing CMP with ID: BZrm1eYa-");
-
-    window.addEventListener("usercentrics_initialized", () => {
-      log("✅ Usercentrics initialized");
-    });
-
-    // simulate SPA navigation
-    const pages = {
-      home: "<h2>Home</h2><p>Welcome to our site!</p>",
-      products: "<h2>Products</h2><p>Here's our product list.</p>",
-      contact: "<h2>Contact</h2><p>Contact us at info@example.com</p>"
-    };
-
-    document.querySelectorAll("nav a").forEach(a => {
-      a.addEventListener("click", e => {
-        const page = e.target.dataset.page;
-        document.getElementById("content").innerHTML = pages[page] || "Unknown page";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        log(`🧭 Navigated to '${page}'`);
-        // simulate losing UC_UI like in client's case
-        if (window.location.hash !== "#simulateBreak") {
-          log("⚠️ Simulating UC_UI lost after navigation...");
-          delete window.UC_UI;
-        }
-      });
-    });
-
-    // reopen consent layer
+  <script nonce="abc123nonce">
     document.getElementById("reopen").addEventListener("click", () => {
       if (typeof UC_UI !== "undefined" && UC_UI.showSecondLayer) {
         UC_UI.showSecondLayer();
-        log("🪟 UC_UI.showSecondLayer() executed");
+        console.log("✅ UC_UI.showSecondLayer() executed.");
       } else {
-        log("❌ UC_UI is not defined or not ready");
+        console.error("❌ UC_UI not defined or showSecondLayer() missing.");
       }
-    });
-
-    // manual reload workaround
-    document.getElementById("reloadUC").addEventListener("click", () => {
-      log("♻️ Reloading Usercentrics...");
-      const old = document.getElementById("usercentrics-cmp");
-      if (old) old.remove();
-      const s = document.createElement("script");
-      s.id = "usercentrics-cmp";
-      s.src = "https://app.usercentrics.eu/browser-ui/latest/loader.js";
-      s.dataset.settingsId = "BZrm1eYa-";
-      s.async = true;
-      s.crossOrigin = "anonymous";
-      document.head.appendChild(s);
     });
   </script>
 </body>
